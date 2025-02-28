@@ -81,3 +81,5 @@ SELECT * from placed_order
 ALTER TABLE placed_order ADD TEXT DEFAULT 'In Progress';
 
 DELETE FROM menu WHERE item_name = '1'
+
+SELECT * FROM reviews
