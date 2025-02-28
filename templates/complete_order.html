@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+
+{% block main_content %}
+
+{% if session['cart-total'] %}
+<form action="" method="POST" novalidate>
+
+    {{ form.hidden_tag() }}
+    {{ form.address.label }}
+    {{ form.address() }}
+    {% for error in form.address.errors %}
+        {{error}}
+    {%endfor%}
+    <br>
+    {{form.instructions.label}}
+    {{form.instructions()}}
+    <br>
+    {{ form.submit() }}
+
+
+
+</form>
+
+<p>Your subtotal is {{cart_total}}</p>
+{%else%}
+<p>Please add items to your cart before proceeding</p>
+{%endif%}
+
+{%endblock%}

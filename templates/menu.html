@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+
+<div>
+    <form action="" method="POST" novalidate>
+
+        {{ form.hidden_tag() }}
+        {{ form.item_name.label }}
+        {{ form.item_name() }}   
+        <br>
+        {{ form.min_price.label }}
+        {{ form.min_price() }}
+        <br>
+        {{ form.max_price.label }}
+        {{ form.max_price() }}
+        <br>
+        {{ form.submit() }}
+    
+    
+    
+    </form>
+</div>
+
+
+
+
+
+<div class="flexbox">
+    {% if menu %}
+    {% for item in menu %}
+    <section>
+        <h3>{{item['item_name']}}</h3>
+
+        <figure>
+        <img src="{{ url_for('static', filename=item['image']) }}" alt="a delectible treat">
+        </figure>
+
+        <p>{{item['description']}}</p>
+
+        <p>Price: €{{item['price']}}</p>
+
+        <p>Stock: {{item['stock']}}</p>
+
+
+
+
+    </section>
+    {% endfor %}
+
+    {% else %}
+    <p>No items match your parameters!</p>
+    {% endif %}
+</div>
+
+<br>
+<a href="{{url_for('add_to_cart')}}" role="button" class="button">Click to order</a>
+
+
+{% endblock %}

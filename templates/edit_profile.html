@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+
+{% block main_content %}
+
+<h2>Username Change</h2>
+<form action="" method="POST" novalidate class="center">
+
+    {{ form1.hidden_tag() }}
+    {{ form1.new_userid.label }}
+    {{ form1.new_userid() }}
+    {% for error in form1.new_userid.errors %}
+        {{error}}
+    {%endfor%}
+    <br>
+    {{ form1.submit() }}
+
+
+
+</form>
+
+<h2>Password Change</h2>
+<form action="" method="POST" novalidate class="center">
+
+    {{ form2.hidden_tag() }}
+    {{ form2.current_password.label }}
+    {{ form2.current_password() }}
+    {% for error in form2.current_password.errors %}
+        {{error}}
+    {%endfor%}
+    <br>
+    {{form2.new_password1.label}}
+    {{form2.new_password1()}}
+    {% for error in form2.new_password1.errors %}
+        {{error}}
+    {%endfor%}
+    <br>
+    {{ form2.submit() }}
+
+
+
+</form>
+
+<p >{{message}}</p>
+
+{%endblock%}
+

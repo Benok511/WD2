@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+<p> Welcome to <i>Ben's Bombastic Bakery</i> home to the most delictable baked goods in all of Ireland!
+    We pride ourself on satifying our customers and building a strong relationship within our community</p>
+
+<figure>
+    <img src="{{url_for('static', filename='bakery.jpg')}}" alt="">
+</figure>
+
+
+<p> On this site you can order our <b>freshly baked</b> treats straight to your doorstep or you can come visit where the
+    magic happens.</p>
+
+<p> We are located on <i>7 Bakewell Street</i> in Mallow, County Cork</p> <!--I made up the street name-->
+
+<h2>Opening Hours</h2>
+<p>Our opening hours are:</p>
+<ul>
+    <li>Monday - Friday: 9am - 7pm</li>
+    <li>Saturday: 9am - 4pm</li>
+    <li>Sunday: Closed</li>
+</ul>
+
+<h2>How to Order</h2>
+<p>To order our delicious treats to your doorstep you must:
+<ol>
+    <li>Create an account or login to your account</li>
+    <li>Visit our menu page</li>
+    <li>Select the items you want and how much of each item you would like</li>
+    <li>Specify if you want it delivered or pick-up in store, If it is delivery you must:
+        <ul>
+            <li>Enter your address and postcode</li>
+            <li>Enter your phone number</li>
+        </ul>
+    </li>
+
+    <li>Confirm your order and wait for the goods to come to you!</li>
+</ol>
+
+
+{%endblock%}

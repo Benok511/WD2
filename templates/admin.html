@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block admin_tools %}
+    <a href="{{url_for('update_stock')}}">Update Stock</a>
+    <a href="{{url_for('update_menu')}}">Update Menu</a>
+{%endblock%}
+
+{% block main_content %}
+
+<h2 class="center">Current Orders</h2>
+<table class="center">
+    <tr>
+        <th scope="col">Order Number</th>
+        <th scope="col">Username</th>
+        <th scope="col">Time Of order</th>
+        <th scope="col">Delivery Address</th>
+        <th scope="col">Instructions</th>
+        <th scope="col">Price</th>
+    </tr>
+    {% for order in orders %}
+    <tr>
+        <td>{{order['order_num']}}</td>
+        <td>{{order['user_id']}}</td>
+        <td>{{order['order_datetime']}}</td>
+        <td>{{order['order_address']}}</td>
+        <td>
+            {% if order['instructions']%}
+            {{order['instructions']}}
+            {%else%}
+            N/A
+            {%endif%}
+
+        </td>
+        <td>€{{order['price']}}</td>
+        <td class="remove"><a class="button" href="{{url_for('order_contents', id = order['order_num'])}}">Order Contents</a></td>
+        <td class="remove"><a href="{{url_for('mark_complete', id = order['order_num'] )}}" class="button">Mark as Completed</a></td>
+        
+
+    </tr>
+
+    {%endfor%}
+</table>
+
+<h2>Most Popular Menu item</h2>
+<figure>
+    <img src="{{url_for('static', filename=most_popular_item['image'])}}" alt="most Popular item">
+    <figcaption>{{most_popular_item['item_name']}}!</figcaption>
+</figure>
+
+
+{%endblock%}

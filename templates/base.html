@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Ben's Bakery</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}">
+</head>
+<body>
+    <header>
+        <h1>Ben's Bakery - {{title}}</h1>
+    </header>
+    <nav>
+        <a href="{{url_for('index')}}">Home</a>
+        
+        <a href="{{url_for('menu')}}">Menu</a>
+        
+        
+        
+
+            {% if g.is_admin %}
+                <a href="{{url_for('admin_tools')}}">Admin</a>
+                {% block admin_tools %}
+                {% endblock %}
+                <a href="{{url_for('logout')}}">Logout</a>  
+            {% else %}
+                {% if g.user %}
+                <a href="{{url_for('add_to_cart')}}">Order</a>
+                <a href="{{url_for('cart')}}">Cart</a>
+                <a href="{{url_for('view_profile')}}">Profile - {{g.user}}</a>
+                <a href="{{url_for('logout')}}">Logout</a>
+                {%else%}
+                <a href="{{url_for('register')}}">Register</a>
+                <a href="{{url_for('login')}}">Login</a>
+                {%endif%}
+            {% endif %}
+
+       
+            
+        
+        
+        
+        
+    </nav>
+
+    <main>
+        {% block main_content %}
+
+        {% endblock %}
+    </main>
+
+    <footer>
+        <p>
+           Please Leave a <a href="{{url_for('send_review')}}">review</a>
+        </p>
+        <p>
+            <small>&copy; Ben O'Keeffe WD2</small>
+        </p>
+    </footer>
+
+</body>
+</html>

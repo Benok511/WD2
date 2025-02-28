@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+
+{% block main_content %}
+
+<h2>Username: {{g.user}}</h2>
+
+{% if order_details %}
+
+<table>
+    <caption>Order History</caption>
+    <tr>
+        <th scope="col">Date Ordered</th>
+        <th scope="col">Delivery Address</th>
+        <th scope="col">Total Price</th>
+    </tr>
+
+    {% for order in order_details %}
+    <tr>
+        <td>{{order['order_datetime']}}</td>
+        <td>{{order['order_address']}}</td>
+        <td>€{{order['price']}}</td>
+        <td class="remove" ><a href="{{url_for('order_contents', id = order['order_num'] )}}" class="button">Order Contents</a></td>
+    </tr>
+    {%endfor%}
+
+</table>
+
+<p>Total spent: €{{total_spent['SUM(price)']}}</p>
+
+{% else %}
+
+<p>You haven't placed an order yet!</p>
+
+{% endif %}
+
+<p><a href="{{url_for('edit_profile')}}" class="button">Edit Profile</a></p>
+
+{% endblock %}
