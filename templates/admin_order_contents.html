@@ -6,13 +6,19 @@
 
 
 <table>
+    <caption>Order No: {{order_num}}</caption>
 <tr>
     <th scope="col">Item Name</th>
     <th scope="col">Quantity</th>
 </tr>
 {% for item in items_in_order %}
+
     <tr>
-        <td>{{item_names[item['item_id']]}}</td>
+        {% if item_names[item['item_id']] %}
+            <td>{{item_names[item['item_id']]}}</td>
+        {%else%}
+            <td>Discontinued item</td>
+        {%endif%}
         <td>{{item['quantity']}}</td>
     </tr>
 {%endfor%}

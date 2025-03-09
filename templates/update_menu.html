@@ -1,47 +1,10 @@
-{% extends "base.html" %}
-
+{% extends 'base.html' %}
 
 {% block main_content %}
 
-<form action="" method="POST" novalidate enctype="multipart/form-data">
+<p class="center"><a href="{{url_for('add_to_menu')}}" class="button">Add to Menu</a></p>
 
-    {{ form.hidden_tag() }}
-    {{ form.item_name.label }}
-    {{ form.item_name() }}
-    {% for error in form.item_name.errors %}
-        {{error}}
-    {%endfor%}
-    <br>
-    {{ form.price.label }}
-    {{ form.price() }}
-    {% for error in form.price.errors %}
-        {{error}}
-    {%endfor%}
-    <br>
-    {{ form.stock.label }}
-    {{ form.stock() }}
-    {% for error in form.stock.errors %}
-        {{error}}
-    {%endfor%}
-    <br>
-    {{ form.description.label }}
-    {{ form.description() }}
-    {% for error in form.description.errors %}
-        {{error}}
-    {%endfor%}
-    <br>
-    {{ form.image.label }}
-    {{ form.image() }}
-    {% for error in form.image.errors %}
-        {{error}}
-    {%endfor%}
-    <br>
-    {{ form.submit() }}
+<p class="center"><a href="{{url_for('delete_menu_item')}}" class="button">Delete from Menu</a></p>
 
-
-
-</form>
-
-<p>{{message}}</p>
 
 {%endblock%}

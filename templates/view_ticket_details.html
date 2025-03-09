@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+
+
+
+<h2>Ticket {{ticket_num}}</h2>
+
+{% if g.is_admin %}
+    <p>Username: {{details['user_id']}}</p>
+{% endif %}
+
+<p>Subject: {{details['subject']}}</p>
+
+<p>Details: {{details['message']}}</p>
+
+
+<h2>Reply From Staff</h2>
+
+{% if details['admin_user_id'] %}
+<p>Reply from {{details['admin_user_id']}}:</p>
+
+<p>{{details['reply']}}</p>
+
+
+{%else%}
+    {% if g.is_admin %}
+        <form action="" method="POST" novalidate>
+
+            {{ form.hidden_tag() }}
+            {{form.reply.label}}
+            {{form.reply()}}
+            {% for error in form.reply.errors %}
+                {{error}}
+            {%endfor%}
+            <br>
+            {{ form.submit() }}
+        
+        
+        
+        </form>
+        {{message}}
+    {%else%}
+        <p>A member of staff will reply to your ticket as soon as possible thank you for your patience.</p>
+    {% endif %}
+{% endif %}
+
+
+{%endblock%}

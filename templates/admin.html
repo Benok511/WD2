@@ -3,11 +3,16 @@
 {% block admin_tools %}
     <a href="{{url_for('update_stock')}}">Update Stock</a>
     <a href="{{url_for('update_menu')}}">Update Menu</a>
+    <a href="{{url_for('financials')}}">View Financials</a>
+    <a href="{{url_for('admin_view_tickets')}}">View Support Tickets</a>
+    <a href="{{url_for('view_staff')}}">View Staff</a>
+
 {%endblock%}
 
 {% block main_content %}
 
 <h2 class="center">Current Orders</h2>
+{%if orders %}
 <table class="center">
     <tr>
         <th scope="col">Order Number</th>
@@ -39,9 +44,12 @@
     </tr>
 
     {%endfor%}
+    {%else%}
+    <p class="center">All orders have been handled!</p>
+    {%endif%}
 </table>
 
-<h2>Most Popular Menu item</h2>
+<h2>Most Popular Menu Item Of All Time</h2>
 <figure>
     <img src="{{url_for('static', filename=most_popular_item['image'])}}" alt="most Popular item">
     <figcaption>{{most_popular_item['item_name']}}!</figcaption>

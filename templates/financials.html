@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+
+{% block main_content %}
+<p>Please enter the month and year to view the revenue from that month.</p>
+<form action="" method="POST" novalidate>
+
+    {{ form.hidden_tag() }}
+    {{ form.month.label }}
+    {{ form.month() }}
+    {% for error in form.month.errors %}
+        {{error}}
+    {%endfor%}
+    <br>
+    {{form.year.label}}
+    {{form.year()}}
+    {% for error in form.year.errors %}
+        {{error}}
+    {%endfor%}
+    <br>
+    {{ form.submit() }}
+
+
+
+</form>
+
+{% if orders %}
+    <table>
+        <caption>Orders for {{month}} {{year}}</caption>
+        <tr>
+            <th scope="col">Order Number</th>
+            <th scope="col">Username</th>
+            <th scope="col">Time Of order</th>
+            <th scope="col">Delivery Address</th>
+            <th scope="col">Instructions</th>
+            <th scope="col">Order Progress</th>
+            <th scope="col">Price</th>
+        </tr>
+        {% for order in orders %}
+        <tr>
+            <td>{{order['order_num']}}</td>
+            <td>{{order['user_id']}}</td>
+            <td>{{order['order_datetime']}}</td>
+            <td>{{order['order_address']}}</td>
+            <td>
+                {% if order['instructions']%}
+                {{order['instructions']}}
+                {%else%}
+                N/A
+                {%endif%}
+    
+            </td>
+            <td>{{order['order_progress']}}</td>
+            <td>€{{order['price']}}</td>
+        {%endfor%}
+    </table>
+
+    <p>Revenue From Completed Orders in {{month}} is €{{revenue['SUM(price)']}}</p>
+
+    <p>Total revenue in {{year}} is €{{yearly_rev['SUM(price)']}}</p>
+
+    <p class="center">Most Popular menu item in {{month}} {{year}} is:</p>
+    <figure>
+        <img src="{{url_for('static', filename=most_popular_item_monthly['image'])}}" alt="Most popular food item">
+        <figcaption>{{most_popular_item_monthly['item_name']}}</figcaption>
+    </figure>
+
+
+{%endif%}
+
+<p>{{message}}</p>
+
+
+{%endblock%}

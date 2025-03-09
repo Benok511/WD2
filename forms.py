@@ -84,3 +84,37 @@ class UpdateMenuForm(FlaskForm):
 
     submit = SubmitField()
 
+class ViewRevenueForm(FlaskForm):
+
+    month = SelectField('Month:', choices= ["January", "February", "March", "April", "May", "June", 
+    "July", "August", "September", "October", "November", "December"])
+
+    year = IntegerField("Year:", validators=[InputRequired()])
+
+    submit = SubmitField()
+
+
+class CreateTicketForm(FlaskForm):
+
+    subject = StringField('Subject')
+
+    message = TextAreaField('Enter Message:', validators=[InputRequired()])
+
+    submit = SubmitField()
+
+class ReplyToTicketForm(FlaskForm):
+
+    reply = TextAreaField('Reply To Ticket:', validators=[InputRequired()])
+
+    submit = SubmitField()
+
+
+class DelFromMenu(FlaskForm):
+    item = SelectField('Select Item:', choices=[])
+
+    submit = SubmitField('Delete')
+
+class AddStaffMemberForm(FlaskForm):
+    user_id = StringField('New Staff Members Username:')
+
+    submit = SubmitField()

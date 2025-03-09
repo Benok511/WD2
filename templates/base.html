@@ -7,8 +7,12 @@
 </head>
 <body>
     <header>
+        <img src="{{url_for('static', filename='cowboybread.png')}}" alt="logo">
         <h1>Ben's Bakery - {{title}}</h1>
+        <img src="{{url_for('static', filename='cowboybread.png')}}" alt="logo">
+
     </header>
+    
     <nav>
         <a href="{{url_for('index')}}">Home</a>
         
@@ -28,6 +32,7 @@
                 <a href="{{url_for('cart')}}">Cart</a>
                 <a href="{{url_for('view_profile')}}">Profile - {{g.user}}</a>
                 <a href="{{url_for('logout')}}">Logout</a>
+                <a href="{{url_for('support')}}">Support</a>
                 {%else%}
                 <a href="{{url_for('register')}}">Register</a>
                 <a href="{{url_for('login')}}">Login</a>
@@ -56,6 +61,7 @@
             <small>&copy; Ben O'Keeffe WD2</small>
         </p>
     </footer>
+
 
 </body>
 </html>

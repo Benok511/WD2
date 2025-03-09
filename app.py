@@ -25,7 +25,7 @@ app.config["SESSION_PERMANENT"] = False
 #file upload setup
 app.config["SESSION_TYPE"] = 'filesystem'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1000 * 1000
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1000 * 1000 #max filesize of 16MB
 
 Session(app)
 app.teardown_appcontext(close_db)
@@ -60,7 +60,11 @@ def restricted():
 
 @app.route('/')
 def index():
-    return render_template('index.html', title = 'Welcome!')
+    db = get_db()
+
+    reviews = db.execute('''SELECT * FROM reviews''').fetchmany(5)
+
+    return render_template('index.html', title = 'Welcome!', reviews = reviews)
 
 
 @app.route('/register', methods=["GET", 'POST'])
@@ -234,6 +238,24 @@ def increment(id):
 
     return redirect(url_for('cart', message = message))
 
+@app.route('/decrement_cart_item/<id>')
+@login_required
+def decrement(id):
+    id = int(id)
+    
+
+    db = get_db()
+    check = db.execute(''' SELECT * FROM menu WHERE item_id = ? ''', (id,)).fetchone()
+
+    if session['cart'][id][1] - 1 == 0:
+        del session['cart'][id]
+    else:
+        session['cart'][id][1] -= 1
+        session['cart'][id][2] = check['price'] * session['cart'][id][1]
+        
+    session.modified = True
+    return redirect(url_for('cart'))
+
 
 @app.route('/order', methods = ['GET', 'POST'])
 @login_required
@@ -308,6 +330,11 @@ def edit_profile ():
 
                 db.execute('''UPDATE placed_order SET user_id = ? WHERE user_id = ?''', (new_userid,g.user))
 
+                db.execute('''UPDATE reviews SET user_id = ? WHERE user_id = ? ''', (new_userid,g.user))
+
+                db.execute('''UPDATE support SET user_id = ? WHERE user_id = ? ''', (new_userid,g.user))
+
+
                 db.commit()
                 session['user_id'] = new_userid
                 
@@ -366,16 +393,19 @@ def send_review():
 @app.route('/cart')
 @login_required
 def cart(): 
+    menu = None
     if 'cart' not in session:
         session['cart'] = {}
         session['cart-total'] = 0
         session.modified = True
     else:
+        db = get_db()
+        menu = db.execute('''SELECT * FROM MENU''').fetchall()
         total = 0
         for id in session['cart']:
             total += session['cart'][id][2]
             session['cart-total'] = total
-    return render_template('cart.html', cart = session['cart'], total = session['cart-total'], title = 'Your Cart')
+    return render_template('cart.html', cart = session['cart'], total = session['cart-total'], title = 'Your Cart', menu = menu )
     
 @app.route('/admin-tools')
 @login_required
@@ -418,10 +448,16 @@ def update_stock():
 
     return render_template('add_to_cart.html', form=form, message=message, title='Update Stock')
 
-@app.route('/update-menu', methods = ["GET","POST"])
+@app.route('/update-menu', methods = ["GET", "POST"])
 @login_required
 @admin_required
 def update_menu():
+    return render_template('update_menu.html', title = 'Update Menu')
+
+@app.route('/add-to-menu', methods = ["GET","POST"])
+@login_required
+@admin_required
+def add_to_menu():
     message = ''
     form = UpdateMenuForm()
 
@@ -452,8 +488,35 @@ def update_menu():
             
         
 
-    return render_template('update_menu.html', form = form, title='Add New Menu Item', message = message)
+    return render_template('add_to_menu.html', form = form, title='Add New Menu Item', message = message)
 
+@app.route('/delete-menu', methods = ['GET',"POST"])
+@login_required
+@admin_required
+def delete_menu_item():
+    form = DelFromMenu()
+    message = ''
+    db = get_db()
+    items = db.execute('''SELECT * FROM MENU''').fetchall()
+
+    for item in items:
+        form.item.choices.append(item['item_name'])
+
+
+    if form.validate_on_submit():
+        item = form.item.data
+        
+        image = db.execute('''SELECT * FROM menu WHERE item_name = ? ''',(item,)).fetchone()
+        os.remove(UPLOAD_FOLDER + '/' + image['image'])
+
+        db.execute('''DELETE FROM MENU WHERE item_name = ?''',(item,))
+        db.commit()
+
+        
+
+        message = 'Item Successfully Removed'
+    
+    return render_template('delete_from_menu.html', title = 'Delete From Menu', form = form, message = message)
 
 
 @app.route('/mark-complete/<id>')
@@ -485,15 +548,191 @@ def order_contents(id):
 
     for item in get_item_names:
         item_names[item['item_id']] = item['item_name']
+        
     
-    
-
     items_in_order = db.execute('''SELECT * FROM in_order WHERE order_num = ?''', (id,)).fetchall()
 
-    return render_template('admin_order_contents.html', title = 'Order Contents', item_names = item_names, items_in_order = items_in_order)
+    return render_template('admin_order_contents.html', title = 'Order Contents', item_names = item_names, items_in_order = items_in_order, order_num = id)
 
+
+
+@app.route('/financials', methods = ["GET", "POST"]) #only feb and march 2025 have proper outputs for obvious reasons
+@login_required
+@admin_required
+def financials():
+    form = ViewRevenueForm()
+    months = {"January": "01", "February": "02", "March": "03", "April": "04", "May": "05",
+    "June": "06", "July": "07", "August": "08", "September": "09", "October": "10", "November": "11",
+    "December": "12"}
+    month = None
+    year = None
+    orders = None
+    revenue = None
+    yearly_rev = None
+    most_popular_item_monthly = None
+    message = ''
+
+    if form.validate_on_submit():
+        month = form.month.data
+        month = months.get(month,None)
+
+        year = form.year.data
+
+        db = get_db()
+        orders = db.execute('''SELECT * FROM placed_order 
+                            WHERE order_datetime BETWEEN ? AND ? AND order_progress = 'Complete' ''', 
+                            (f"{year}-{month}-01",f"{year}-{month}-31")).fetchall()
+        
+        revenue = db.execute('''SELECT SUM(price) FROM placed_order 
+                            WHERE order_datetime BETWEEN ? AND ? AND order_progress = 'Complete' ''', 
+                            (f"{year}-{month}-01)",f"{year}-{month}-31")).fetchone()
+        
+        yearly_rev = db.execute('''SELECT SUM(price) FROM placed_order 
+                            WHERE order_datetime BETWEEN ? AND ? AND order_progress = 'Complete' ''', 
+                            (f"{year}-01-01)",f"{year}-12-31")).fetchone()
+        
+        most_popular_item_monthly = db.execute('''
+        SELECT *
+        FROM menu 
+        WHERE item_id = (
+            SELECT item_id 
+            FROM (
+                SELECT in_order.item_id, SUM(in_order.quantity) AS total_qty
+                FROM in_order
+                WHERE in_order.order_num IN (
+                    SELECT order_num 
+                    FROM placed_order 
+                    WHERE order_datetime BETWEEN ? and ?
+                )
+                GROUP BY in_order.item_id
+                ORDER BY total_qty DESC
+                LIMIT 1
+            ) AS item_totals
+        )
+    ''',(f"{year}-{month}-01)",f"{year}-{month}-31")).fetchone()
+        
+        if len(orders) == 0:
+            message = 'No orders during this period!'
+
+    return render_template('financials.html', form=form, title='View Revenue', month = form.month.data, year = year, message = message,
+                           orders = orders, most_popular_item_monthly = most_popular_item_monthly, revenue = revenue, yearly_rev = yearly_rev)
+
+
+@app.route('/support')
+@login_required
+def support():
+    return render_template('support.html', title = 'Support')
+
+@app.route('/create-support-ticket', methods = ['GET', 'POST'])
+@login_required
+def create_ticket():
+    form = CreateTicketForm()
+    message = ''
+    if form.validate_on_submit():
+        ticket_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        subject = form.subject.data
+        message = form.message.data
+
+        db = get_db()
+        db.execute('''INSERT INTO support (user_id, ticket_datetime, subject, message)
+                   VALUES (?,?,?,?)''',(g.user,ticket_datetime,subject,message))
+        db.commit()
+
+        message = 'Support ticket created successfuly!'
+
+    return render_template('create_support_ticket.html', title = 'Create Ticket', form = form, message = message)
+
+
+@app.route('/view-tickets')
+@login_required
+def view_tickets():
+    db = get_db()
+
+    tickets = db.execute('''SELECT * FROM support WHERE user_id = ?''',(g.user,)).fetchall()
+
+    return render_template('view_tickets.html', title = 'View Tickets', tickets = tickets)
+
+@app.route('/view-ticket-details/<ticket_id>', methods = ['GET', 'POST']) 
+@login_required
+# you have to refresh the page after submitting a reply to a support ticket to see the ticket has been sent as there is no javascript in this program                                                                        
+def view_ticket_details(ticket_id):
+    ticket_id = int(ticket_id)
+    form = None
+
+    db = get_db()
+    details = db.execute('''SELECT * FROM support WHERE ticket_num = ?''',(ticket_id,)).fetchone()
+
+    if g.user != details['user_id'] and g.is_admin is None:
+        return redirect(url_for('restricted'))
+    
+    if g.is_admin is not None:
+        form = ReplyToTicketForm()
+        
+        if form.validate_on_submit():
+            reply = form.reply.data
+            reply_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            db.execute('''UPDATE support SET admin_user_id = ?, reply_datetime = ?, reply = ? 
+                       WHERE ticket_num = ?''',(g.user,reply_datetime,reply,ticket_id))
+            
+            db.commit()
         
 
+    return render_template('view_ticket_details.html', title = 'View Ticket Details', ticket_num = ticket_id, details = details, form = form)
+
+@app.route('/admin-view-tickets')
+@login_required
+@admin_required
+def admin_view_tickets():
+    db = get_db()
+    tickets = db.execute('''SELECT * FROM support WHERE reply = "" ''').fetchall()
+
+    return render_template('view_tickets.html', tickets = tickets, title = 'View Unanswered Tickets')
+
+@app.route('/add-new-staff', methods = ["GET", "POST"])
+@login_required
+@admin_required
+def add_new_staff():
+    form = AddStaffMemberForm()
+    message = ''
+    if form.validate_on_submit():
+        user_id = form.user_id.data
+
+        db = get_db()
+
+        check_user = db.execute('''SELECT * FROM customers WHERE user_id = ?''', (user_id,)).fetchone()
+
+        if check_user is None:
+            form.user_id.errors.appent('This user does not exist')
+        
+        else:
+            db.execute('''UPDATE customers SET is_admin = 1 WHERE user_id = ?''', (user_id,))
+            db.commit()
+            message = 'Staff Member successfully added'
+
+    return render_template('add_staff.html', form = form, message = message, title = 'Add New Staff Members')
+
+@app.route('/view-staff', methods =["GET", 'POST'])
+@login_required
+@admin_required
+def view_staff():
+    db = get_db()
+    staff =  db.execute('''SELECT * FROM customers WHERE is_admin = 1''').fetchall()
+
+    return render_template('view_staff.html', staff = staff, title = 'Employee Roster' )
+
+@app.route('/remove-staff/<user_id>')
+@login_required
+@admin_required
+def remove_staff(user_id):
+    if user_id == g.user: #not allowing to remove yourself ass admin
+        pass
+    else:
+        db = get_db()
+        db.execute("""UPDATE customers SET is_admin = 0 WHERE user_id = ?""", (user_id,))
+        db.commit()
+
+    return redirect(url_for('view_staff'))
 
 
 @app.errorhandler(404)

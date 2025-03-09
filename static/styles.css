@@ -11,8 +11,6 @@
     --accentcolour: #e9edc9;
     --accentcolour2: #faedcd;
 
-
-
 }
 
 *,
@@ -96,10 +94,6 @@ header h1 {
 }
 
 
-
-
-
-
 nav a:first-child {
     border-left:none;
 }
@@ -128,13 +122,21 @@ table{
     text-align: center;
 }
 
+
+table{
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
 th,td{
     border: 1px solid black;
     padding: 0.5em;
 }
 input{
     margin: 0.5em 0 ;
+    border: 0.25px solid var(--colour);
+    border-radius: 0.25em;
 }
+
 
 nav {
     display: flex;
@@ -196,6 +198,13 @@ main img, video{
 
 .flexbox section p{
     text-align: center;
+}
+
+.review {
+    border: 1px solid var(--colour);
+    border-radius: 0.5em;
+    background-color: var(--accentcolour);
+    margin: 1em 1.5em;
 }
 
 

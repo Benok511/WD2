@@ -57,6 +57,20 @@ CREATE TABLE reviews (
 );
 
 
+DROP TABLE IF EXISTS support;
+
+CREATE TABLE support(
+    ticket_num INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    ticket_datetime DATETIME NOT NULL,
+    subject TEXT NOT NULL,
+    message TEXT NOT NULL,
+    admin_user_id TEXT DEFAULT '',
+    reply_datetime DATETIME DEFAULT '',
+    reply TEXT DEFAULT ''
+    );
+
+
 
 INSERT INTO menu (item_name, price, stock, image, description) VALUES
     ('Apple Tart', 5, 20, 'appletart.jpg', 'A delicious apple tart with a buttery crust.'),
@@ -72,7 +86,7 @@ INSERT INTO menu (item_name, price, stock, image, description) VALUES
     ('Muffin', 3, 20, 'muffin.jpg', 'A fluffy blueberry muffin.'),
     ('Pain au Chocolat', 4, 18, 'painauchoc.jpg', 'A croissant filled with chocolate.');
 
-SELECT * from customers
+SELECT * from menu
 
 UPDATE placed_order SET user_id = 'test' WHERE user_id = ''
 
@@ -80,6 +94,5 @@ SELECT * from placed_order
 
 ALTER TABLE placed_order ADD TEXT DEFAULT 'In Progress';
 
-DELETE FROM menu WHERE item_name = '1'
+DELETE FROM menu WHERE item_name = 'test'
 
-SELECT * FROM reviews

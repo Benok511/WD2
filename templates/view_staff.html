@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+    <p><a class="button" href="{{url_for('add_new_staff')}}">Add New Staff</a></p>
+
+    {% if staff %}
+    <table>
+        <tr>
+            <th scope="col">Employee Username</th>
+        </tr>
+        {% for employee in staff %}
+        <tr>
+            <td>{{employee['user_id']}}</td>
+            <td class="remove"><a class="button" href="{{url_for('remove_staff', user_id=employee['user_id'])}}">Remove From Roster</a></td>
+        </tr>
+        {%endfor%}
+
+    </table>
+    {%else%}
+        <p>There are no employees.</p>
+    {%endif%}
+
+{% endblock %}

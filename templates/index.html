@@ -28,15 +28,23 @@
     <li>Create an account or login to your account</li>
     <li>Visit our menu page</li>
     <li>Select the items you want and how much of each item you would like</li>
-    <li>Specify if you want it delivered or pick-up in store, If it is delivery you must:
-        <ul>
-            <li>Enter your address and postcode</li>
-            <li>Enter your phone number</li>
-        </ul>
-    </li>
-
+    <li>Enter your delivery address</li>
+    <li>Enter special delivery instructions (optional)</li>
     <li>Confirm your order and wait for the goods to come to you!</li>
 </ol>
 
+{% if reviews %}
+<h2>Reviews!</h2>
 
+{% for review in reviews %}
+<div class="review">
+    <h5>Review by {{review['user_id']}}</h5>
+
+    <p>Rating: {{review['rating']}}/10</p>
+
+    <p>{{review['details']}}</p>
+</div>
+{%endfor%}
+
+{%endif%}
 {%endblock%}

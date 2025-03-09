@@ -17,6 +17,7 @@
             <td>{{cart[id][2]}}</td>
             <td class="remove"> <a href="{{url_for('remove', id=id)}}" class="button">Remove</a> </td>
             <td class="remove"> <a href="{{url_for('increment', id=id)}}" class="button">Add another</a> </td>
+            <td class="remove"> <a href="{{url_for('decrement', id=id)}}" class="button">Remove One</a> </td>
         </tr>
      {%endfor%}
 </table>
