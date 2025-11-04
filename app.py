@@ -9,10 +9,15 @@ from functools import wraps
 import os
 
 '''
-The file upload code was learned from https://flask.palletsprojects.com/en/stable/patterns/fileuploads/
+The file upload code was learned and adapted from https://flask.palletsprojects.com/en/stable/patterns/fileuploads/
 
 2 types of Users, Admins and customers, to login as an admin the Username is "admin" and the password is also "admin".
 To login as a customer just register as usual.
+
+Passing data through url_for in the jinja was adapted from https://stackoverflow.com/questions/7478366/create-dynamic-urls-in-flask-with-url-for
+
+for the support section the user can create tickets then the admin can respond and when the user checks the ticket the admin
+response will be there
 '''
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'static')
@@ -21,9 +26,10 @@ ALLOWED_EXTENSIONS = ['png','jpg','jpeg']
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "this-is-my-secret-key"
 app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = 'filesystem'
+
 
 #file upload setup
-app.config["SESSION_TYPE"] = 'filesystem'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1000 * 1000 #max filesize of 16MB
 
@@ -158,9 +164,6 @@ def menu():
         
         else:
             menu = db.execute("""SELECT * FROM menu""").fetchall()
-        
-        
-
 
 
 
@@ -195,10 +198,10 @@ def add_to_cart():
             if 'cart' not in session:
                 session['cart'] = {}
             if item not in session['cart']:
-                session['cart'][id] = [item , qty , check_stock['price'] * qty]
+                session['cart'][id] = [item , qty , check_stock['price'] * qty, check_stock['image']]
             else:
                 session['cart'][id][1] += qty
-                session['cart'][id][2] = check_stock['price']  * session['cart'][item][1]
+                session['cart'][id][2] = check_stock['price']  * session['cart'][id][1]
             
             
             session.modified = True
@@ -404,7 +407,7 @@ def cart():
         total = 0
         for id in session['cart']:
             total += session['cart'][id][2]
-            session['cart-total'] = total
+        session['cart-total'] = total
     return render_template('cart.html', cart = session['cart'], total = session['cart-total'], title = 'Your Cart', menu = menu )
     
 @app.route('/admin-tools')
@@ -424,14 +427,14 @@ def admin_tools():
 
     most_popular_item = db.execute('''SELECT * From menu WHERE item_id = ?''', (most_popular_item_id[0],)).fetchone()
 
-    return render_template('admin.html', orders = orders, most_popular_item = most_popular_item, title = 'Admin')
+    return render_template('admin.html', orders = orders, most_popular_item = most_popular_item, title = 'Current Orders')
 
 @app.route("/update-stock", methods = ["GET","POST"])
 @login_required
 @admin_required
 def update_stock():
     message = ''
-    form = addToCartForm()
+    form = UpdateStockForm()
 
     db = get_db()
     choices = db.execute('''SELECT * FROM menu''').fetchall()
@@ -446,7 +449,7 @@ def update_stock():
         db.commit()
         message = 'Stock successfully updated'
 
-    return render_template('add_to_cart.html', form=form, message=message, title='Update Stock')
+    return render_template('update_stock.html', form=form, message=message, title='Update Stock')
 
 @app.route('/update-menu', methods = ["GET", "POST"])
 @login_required
@@ -468,7 +471,7 @@ def add_to_menu():
         image = form.image.data
         description = form.description.data
 
-       #file upload code learned from flask documentation, os module learned in CS1117
+       #file upload code learned from flask documentation link provided on, os module learned in CS1117
 
         image_type = image.filename.split('.')
         
@@ -653,8 +656,7 @@ def view_tickets():
     return render_template('view_tickets.html', title = 'View Tickets', tickets = tickets)
 
 @app.route('/view-ticket-details/<ticket_id>', methods = ['GET', 'POST']) 
-@login_required
-# you have to refresh the page after submitting a reply to a support ticket to see the ticket has been sent as there is no javascript in this program                                                                        
+@login_required #you have to refresh the page after submitting a reply to a support ticket to see the reply has been sent
 def view_ticket_details(ticket_id):
     ticket_id = int(ticket_id)
     form = None
@@ -703,7 +705,7 @@ def add_new_staff():
         check_user = db.execute('''SELECT * FROM customers WHERE user_id = ?''', (user_id,)).fetchone()
 
         if check_user is None:
-            form.user_id.errors.appent('This user does not exist')
+            form.user_id.errors.append('This user does not exist')
         
         else:
             db.execute('''UPDATE customers SET is_admin = 1 WHERE user_id = ?''', (user_id,))
@@ -725,15 +727,36 @@ def view_staff():
 @login_required
 @admin_required
 def remove_staff(user_id):
-    if user_id == g.user: #not allowing to remove yourself ass admin
-        pass
-    else:
+    if user_id != g.user: #not allowing to remove yourself ass admin
         db = get_db()
         db.execute("""UPDATE customers SET is_admin = 0 WHERE user_id = ?""", (user_id,))
         db.commit()
 
     return redirect(url_for('view_staff'))
 
+@app.route('/view-reviews-admin')
+@login_required
+@admin_required
+def view_reviews ():
+    db = get_db()
+    reviews = db.execute("""SELECT * FROM reviews""").fetchall()
+
+    return render_template("view_reviews.html", title = 'View Reviews', reviews = reviews)
+
+@app.route('/delete-review/<review_num>')
+@login_required
+@admin_required
+def delete_review(review_num):
+    review_num = int(review_num)
+    db = get_db()
+    db.execute("""DELETE FROM reviews WHERE review_num = ?""", (review_num,))
+    db.commit()
+
+    return redirect(url_for('view_reviews'))
+
+@app.route('/credits')
+def credits():
+    return render_template('credits.html', title = 'Credits')
 
 @app.errorhandler(404)
 def cant_park_there_mate(error):

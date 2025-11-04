@@ -6,10 +6,10 @@
     font-family: sans-serif, 'Times New Roman', Times, serif;
     font-size: 16px;
     --colour: black;
-    --mainbgcolour: #fefae0;
-    --bgcolour: #ccd5ae;
-    --accentcolour: #e9edc9;
-    --accentcolour2: #faedcd;
+    --mainbgcolour: #ffc8dd;
+    --bgcolour: #cdb4db;
+    --accentcolour: #ffafcc;
+    --accentcolour2: #bde0fe;
 
 }
 
@@ -27,11 +27,21 @@ small {
 body {
     color: var(--colour);
     background-color: var(--bgcolour);
-    margin: 0;
-
+    display: grid;
+    grid-template-columns: 1fr 9fr;
+    grid-template-areas: "top top"
+        "ml mr"
+        "bottom bottom";
+    gap: 0.5em;
+    width: 90%;
+    margin: 0 auto;
 
 }
-
+.cart_img{
+    max-width: 10%;
+    
+    margin: 1em;
+}
 p {
     margin: 1em;
 }
@@ -58,7 +68,7 @@ header {
 .button {
     display: inline-block;
     padding: 1em 2em;
-    background-color: var(--accentcolour);
+    background-color: var(--accentcolour2);
     color: var(--colour);
     text-decoration: none;
     border-radius: 5px;
@@ -93,9 +103,8 @@ header h1 {
 
 }
 
-
-nav a:first-child {
-    border-left:none;
+nav a:first-child{
+    border-top: none;
 }
 
 
@@ -131,13 +140,24 @@ th,td{
     border: 1px solid black;
     padding: 0.5em;
 }
-input{
+input, select,textarea{
     margin: 0.5em 0 ;
     border: 0.25px solid var(--colour);
     border-radius: 0.25em;
+    background-color: var(--accentcolour);
+    padding-top: 0.25em;
+  
+    
 }
 
+input[type = 'submit']{
+    background-color: var(--accentcolour2)
+}
 
+input[type = 'file']{
+    border: none;
+    background-color: var(--mainbgcolour);
+}
 nav {
     display: flex;
     flex-direction: column;
@@ -158,13 +178,15 @@ nav a {
     width: 100%;
     text-align: center;
     color: var(--colour);
-    border-bottom: 1px solid var(--colour);
     padding: 1em;
+    border-top: 1px solid var(--colour);
+    
 
 }
 
+
 nav a:hover {
-    background-color: beige;
+    background-color: var(--accentcolour);
 
 
 }
@@ -189,16 +211,15 @@ video {
 
 
 }
-
+.cart_itemname{
+    text-align: left;
+    margin: 1em;
+}
 main img, video{
     border: 0.5px solid var(--colour);
     border-radius: 0.5em;
 }
 
-
-.flexbox section p{
-    text-align: center;
-}
 
 .review {
     border: 1px solid var(--colour);
@@ -207,54 +228,56 @@ main img, video{
     margin: 1em 1.5em;
 }
 
-
-
-@media screen and (min-width: 480px) {
-
-    nav {
-        flex-direction: row;
-        justify-content: space-evenly;
-    }
-
-    nav a {
-        flex: 1;
-        border-bottom: none;
-        border-left: 1px solid var(--colour);
-
-
-    }
-
-
-    body {
-        width: 90%;
-        margin: 0 auto;
-    }
-
-    .flexbox {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 2em;
-    }
-
-    .flexbox>section {
-        flex: 1 275px;
-        margin: 2em 1em;
-
-    }
-
-    div>section>* {
-        margin: 1em 2em;
-    }
-
-
-
-
+.flexbox>section {
+    flex: 1 275px;
+    margin: 2em 1em;
 
 }
 
-@media screen and (min-width: 1024px) {
+div>section>* {
+    margin: 1em 2em;
+}
+
+.flexbox {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2em;
+}
+
+header {
+    grid-area: top;
+}
+
+nav {
+    grid-area: ml;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
+    align-self: start;
+    justify-content: flex-start;
+    margin-bottom: 1em;
+
+
+}
+nav a {
+    border-top: 1px solid var(--colour);
+    
+    padding: 1em;
+}
+
+main {
+    grid-area: mr;
+}
+
+footer {
+    grid-area: bottom;
+}
+
+
+
+/* @media screen and (min-width: 1024px) {
 
     body {
         display: grid;
@@ -293,80 +316,11 @@ main img, video{
         border-top: 1px solid var(--colour);
         border-left: none;
         padding: 1em;
-
-
-
     }
 
-    nav a:first-child{
-        border-top: none;
-    }
+   
 
 
-}
+} */
 
-/*
-
-html {
-    background-color: paleturquoise;
-}
-
-body{
-    width: 80%;
-    margin: 0 auto;
-    background-color: white ;
-    border: 1px solid black;
-}
-
-header, footer{
-    color: white;
-    background-color: black;
-    padding: 1em
-}
-
-header{
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    align-items: center;
-}
-
-nav {
-    flex-direction: row;
-    justify-content: space-evenly;
-    flex-wrap: nowrap;
-    align-items: center;
-    justify-content: flex-start;
-    border: 1px solid black;
-    border-radius: 0.5em;
-    padding: 1em;
-    margin-bottom: 1em;
-}
-
-nav a:any-link{
-    border: 1px solid black;
-    background-color: white;
-    color:black;
-    padding: 1em;
-    text-decoration: none;
-    flex: 1;
-
-}
-
-table{
-    border-collapse: collapse;
-    margin: 1em 0;
-}
-
-th,td{
-    border: 1px solid black;
-    padding: 0.5em;
-}
-input{
-    margin: 0.5em 0 ;
-}
-main{
-    padding: 2em;
-}
 

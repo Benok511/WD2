@@ -29,7 +29,7 @@
 <div class="flexbox">
     {% if menu %}
     {% for item in menu %}
-    <section>
+    <section class="review">
         <h3>{{item['item_name']}}</h3>
 
         <figure>
@@ -54,7 +54,10 @@
 </div>
 
 <br>
+<!--Not allowing admins to order-->
+{% if not g.is_admin %}
 <a href="{{url_for('add_to_cart')}}" role="button" class="button">Click to order</a>
+{%endif%}
 
 
 {% endblock %}

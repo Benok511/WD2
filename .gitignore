@@ -1,0 +1,26 @@
+# --- PYTHON BUILD AND CACHE FILES ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- VIRTUAL ENVIRONMENTS ---
+venv/
+env/
+.venv/
+
+# --- OS / EDITOR JUNK FILES ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# --- TEST / LOG / BACKUP FILES ---
+*.log
+*.bak
+*.tmp
+*.swp
+
+# --- PYTHON BUILD DISTRIBUTIONS (if packaging later) ---
+build/
+dist/
+*.egg-info/

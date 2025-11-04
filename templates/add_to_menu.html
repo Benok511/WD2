@@ -3,7 +3,7 @@
 
 {% block main_content %}
 
-<form action="" method="POST" novalidate enctype="multipart/form-data">
+<form action="" method="POST" novalidate enctype="multipart/form-data"> <!--Changed enctype to handle file-upload-->
 
     {{ form.hidden_tag() }}
     {{ form.item_name.label }}

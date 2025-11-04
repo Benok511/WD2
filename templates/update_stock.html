@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+
+{% block main_content %}
+
+<p>Select the Desired item and specify how much new stock is being added.</p>
+
+
+<form action="" method="POST" novalidate>
+
+    {{ form.hidden_tag() }}
+    {{ form.item.label }}
+    {{ form.item() }}   
+    <br>
+    {{ form.qty.label }}
+    {{ form.qty() }}
+    {% for error in form.qty.errors %}
+        {{error}}
+    {%endfor%}
+    <br>
+    {{ form.submit() }}
+
+
+
+</form>
+
+<p>{{message}}</p>
+
+
+
+{%endblock%}

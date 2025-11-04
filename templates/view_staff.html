@@ -1,10 +1,14 @@
 {% extends "base.html" %}
 
 {% block main_content %}
+<p>All the users in this table have admin privileges. You can Add new Staff or Delete exesting staff that no longer work here, but you cannot remove yourself.</p>
+
     <p><a class="button" href="{{url_for('add_new_staff')}}">Add New Staff</a></p>
 
     {% if staff %}
+    
     <table>
+        
         <tr>
             <th scope="col">Employee Username</th>
         </tr>

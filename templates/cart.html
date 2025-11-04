@@ -4,6 +4,39 @@
 
 {% if cart %}
 
+{% for id in cart %}
+    <div class="review">
+        <h5 class="cart_itemname">{{cart[id][0]}}</h5>
+        <img class="cart_img" src="{{url_for('static', filename=cart[id][3])}}" alt="cart_item">
+        <p>Quantity: {{cart[id][1]}}</p>
+        <p>Price: {{cart[id][2]}}</p>
+        <p>
+            <a href="{{url_for('remove', id=id)}}" class="button">Remove</a>
+            <a href="{{url_for('increment', id=id)}}" class="button">Add another</a>
+            <a href="{{url_for('decrement', id=id)}}" class="button">Remove One</a>
+        </p>
+
+    </div>
+
+{%endfor%}
+
+{% else %}
+
+<p>Your cart is empty!</p>
+
+{% endif %}
+
+{{message}}
+
+<p>Total: €{{total}} </p>
+
+<a href="{{url_for('add_to_cart')}}" class="button">Add More Items</a>
+
+<p> <a href="{{url_for('order')}}" class="button">Proceed to Checkout</a></p>
+
+{% endblock %}
+
+<!--
 <table>
     <tr>
         <th scope="col">Item Name</th>
@@ -24,14 +57,4 @@
     {{message}}
 
     <p>Total: €{{total}} </p>
-{% else %}
-
-<p>Your cart is empty!</p>
-
-{% endif %}
-
-<a href="{{url_for('add_to_cart')}}" class="button">Add More Items</a>
-
-<p> <a href="{{url_for('order')}}" class="button">Proceed to Checkout</a></p>
-
-{% endblock %}
+    -->

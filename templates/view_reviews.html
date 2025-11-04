@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+
+{% block main_content %}
+
+{% if reviews %}
+
+<table class="middle">
+    <tr>
+        <th scope="col">Username</th>
+        <th scope="col">Date</th>
+        <th scope="col">Rating</th>
+        <th scope="col">Details</th>
+    </tr>
+    {% for review in reviews %}
+    <tr>
+        <td>{{review['user_id']}}</td>
+        <td>{{review['date_sent']}}</td>
+        <td>{{review['rating']}}</td>
+        <td>{{review['details']}}</td>
+        <td class="remove"><a class="button" href="{{url_for('delete_review', review_num = review['review_num'])}}">Delete Review</a></td>
+    </tr>
+    {%endfor%}
+    
+</table>
+
+{%else%}
+<p>No Reviews have been made!</p>
+{%endif%}
+
+{%endblock%}

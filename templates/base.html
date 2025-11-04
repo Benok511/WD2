@@ -4,11 +4,16 @@
     <meta charset="utf-8" />
     <title>Ben's Bakery</title>
     <link rel="stylesheet" href="{{url_for('static', filename='styles.css')}}">
+    <link rel="icon" href="{{url_for('static', filename='favicon.ico')}}" />
 </head>
 <body>
     <header>
         <img src="{{url_for('static', filename='cowboybread.png')}}" alt="logo">
-        <h1>Ben's Bakery - {{title}}</h1>
+        <h1>Ben's Bakery - {{title}} 
+            {% if g.is_admin %}
+            - Admin Mode
+            {%endif%}
+        </h1>
         <img src="{{url_for('static', filename='cowboybread.png')}}" alt="logo">
 
     </header>
@@ -22,9 +27,13 @@
         
 
             {% if g.is_admin %}
-                <a href="{{url_for('admin_tools')}}">Admin</a>
-                {% block admin_tools %}
-                {% endblock %}
+                <a href="{{url_for('admin_tools')}}">Current Orders</a>
+                <a href="{{url_for('update_stock')}}">Update Stock</a>
+                <a href="{{url_for('update_menu')}}">Update Menu</a>
+                <a href="{{url_for('financials')}}">View Financials</a>
+                <a href="{{url_for('admin_view_tickets')}}">View Support Tickets</a>
+                <a href="{{url_for('view_staff')}}">View Staff</a>
+                <a href="{{url_for('view_reviews')}}">View Reviews</a>
                 <a href="{{url_for('logout')}}">Logout</a>  
             {% else %}
                 {% if g.user %}
@@ -60,6 +69,12 @@
         <p>
             <small>&copy; Ben O'Keeffe WD2</small>
         </p>
+
+        <p>
+            <small><a href="{{url_for('credits')}}">Credits</a></small>
+        </p>
+
+        
     </footer>
 
 

@@ -118,3 +118,10 @@ class AddStaffMemberForm(FlaskForm):
     user_id = StringField('New Staff Members Username:')
 
     submit = SubmitField()
+
+class UpdateStockForm(FlaskForm):
+    item = SelectField("Select item:", choices=[], validators=[InputRequired()] )
+
+    qty = IntegerField('Quantity', validators=[InputRequired(), NumberRange(1)])
+
+    submit = SubmitField('Add Stock')
