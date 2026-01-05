@@ -7,6 +7,7 @@ from werkzeug.utils import secure_filename
 from flask_session import Session
 from functools import wraps
 import os
+from api_routes import api
 
 '''
 The file upload code was learned and adapted from https://flask.palletsprojects.com/en/stable/patterns/fileuploads/
@@ -27,6 +28,9 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = "this-is-my-secret-key"
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = 'filesystem'
+
+#adding api connection
+app.register_blueprint(api)
 
 
 #file upload setup
