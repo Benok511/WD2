@@ -41,13 +41,21 @@ def apiKeyRequired(view):
 
 class Menu(Resource):
     method_decorators = [apiKeyRequired]
-    def get(self):
+    def get(self,itemid=None):
         db = get_db()
-        menu = db.execute('SELECT * FROM menu').fetchall()
-        menu = [dict(item) for item in menu]
-        return menu,200
+        if itemid is None:
+            menu = db.execute('SELECT * FROM menu ORDER BY item_id').fetchall()
+            menu = [dict(item) for item in menu]
+            return menu,200
+        
+        else:
+            item = db.execute("SELECT * FROM menu WHERE item_id = ?",(itemid,)).fetchone()
+            if item is None:
+                return {'message':'Item not found'},404
+            return dict(item),200
+        
 
-myapi.add_resource(Menu, '/menu')
+myapi.add_resource(Menu, '/menu','/menu/<int:itemid>')
 
 class Users(Resource):
     method_decorators = [apiKeyRequired]
@@ -62,6 +70,8 @@ class Users(Resource):
 myapi.add_resource(Users,'/users')
 
 class Reviews(Resource):
+    method_decorators = [apiKeyRequired]
+
     def get(self):
         db = get_db()
         reviews = db.execute('Select * from reviews')
@@ -71,6 +81,9 @@ class Reviews(Resource):
             review["date_sent"] = review["date_sent"].isoformat()
             reviewArr.append(review)
         return reviewArr,200
+
+    def post(self):
+        pass
 
 myapi.add_resource(Reviews,"/reviews")
 
