@@ -20,6 +20,7 @@ Thumbs.db
 *.bak
 *.tmp
 *.swp
+*.sqlite
 
 # --- PYTHON BUILD DISTRIBUTIONS (if packaging later) ---
 build/

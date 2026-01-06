@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 from flask_session import Session
 from functools import wraps
 import os
-from api_routes import api
+from api_routes import api,generate_api_key
 
 '''
 The file upload code was learned and adapted from https://flask.palletsprojects.com/en/stable/patterns/fileuploads/
@@ -757,6 +757,24 @@ def delete_review(review_num):
     db.commit()
 
     return redirect(url_for('view_reviews'))
+
+@app.route('/add-api-client', methods=["GET","POST"])
+@login_required
+@admin_required
+def addApiClient():
+    form = ApiClientForm()
+    message = ''
+    if form.validate_on_submit():
+        name = form.name.data
+        apiKey = generate_api_key()
+        created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        db = get_db()
+        db.execute('''INSERT INTO api_clients(name,api_key,created_at)
+                   VALUES (?,?,?)''',(name,apiKey,created_at))
+        db.commit()
+        message = f'client successfully added. API KEY: {apiKey}'
+    
+    return render_template('AddApiClient.html',form=form,message=message,title='Add Api Client')
 
 @app.route('/credits')
 def credits():

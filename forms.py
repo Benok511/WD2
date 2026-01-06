@@ -125,3 +125,8 @@ class UpdateStockForm(FlaskForm):
     qty = IntegerField('Quantity', validators=[InputRequired(), NumberRange(1)])
 
     submit = SubmitField('Add Stock')
+
+class ApiClientForm(FlaskForm):
+    name = StringField('Client Name')
+
+    submit = SubmitField("Add Client")
