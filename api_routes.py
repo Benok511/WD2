@@ -16,6 +16,10 @@ def generate_api_key():
     return secrets.token_hex(64) 
 
 def apiKeyRequired(view):
+    '''
+    Refactored admin required to do the same for api keys
+    rather than requireing admin
+    '''
     @wraps(view)
     def wrappedView(*args,**kwargs):
         api_key = request.headers.get("x-api-key")
@@ -42,6 +46,10 @@ def apiKeyRequired(view):
 class Menu(Resource):
     method_decorators = [apiKeyRequired]
     def get(self,itemid=None):
+        '''
+        returns full menu if no id specified in url or returns single item
+        in json format
+        '''
         db = get_db()
         if itemid is None:
             menu = db.execute('SELECT * FROM menu ORDER BY item_id').fetchall()
@@ -61,6 +69,9 @@ class Users(Resource):
     method_decorators = [apiKeyRequired]
 
     def get(self):
+        '''
+        returns list of users registered - only uid
+        '''
         db = get_db()
         users = db.execute('select user_id from customers').fetchall()
         users = [dict(user) for user in users]
@@ -73,6 +84,9 @@ class Reviews(Resource):
     method_decorators = [apiKeyRequired]
 
     def get(self):
+        '''
+        returns all reviews in json format
+        '''
         db = get_db()
         reviews = db.execute('Select * from reviews')
         reviewArr = []
@@ -83,7 +97,31 @@ class Reviews(Resource):
         return reviewArr,200
 
     def post(self):
-        pass
+        '''
+        post method to add reviews via our api
+        expects data sent in json with
+        '''
+        data = request.get_json()
+        rating = data.get('rating',None)
+        description = data.get('description',None)
+        if not rating or not description:
+            return {'message':'rating and description are required'},500 
+        
+        date_sent = datetime.now().date().isoformat()
+        apikey = request.headers.get('x-api-key')
+        db = get_db()
+        user = db.execute('SELECT name from api_clients WHERE api_key = ?',(apikey,)).fetchone()
+        if user:
+            username=user['name']
+        else:
+            return {'message: api key is invalid'},403
+        
+        db.execute("""INSERT INTO reviews (user_id,date_sent,rating,details)
+                   VALUES (?,?,?,?)""",(f'{username} user',date_sent,rating,description))
+        
+        db.commit()
+        return {'message':'Review successfully sent'},201
+        
 
 myapi.add_resource(Reviews,"/reviews")
 
@@ -92,6 +130,10 @@ class Orders(Resource):
     method_decorators = [apiKeyRequired]
 
     def get(self):
+        '''
+        returns all orders - in industry this wouldnt be a function for privacy reasons
+        i just made it to practice
+        '''
         db = get_db()
         orders = db.execute("Select * from placed_order")
         orders = [dict(order) for order in orders]
