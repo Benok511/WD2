@@ -28,16 +28,19 @@ def apiKeyRequired(view):
             "SELECT * FROM api_clients WHERE api_key = ? AND active = 1",
             (api_key,)
         ).fetchone()
+        
 
         if not client:
             return {"message": "Invalid or inactive API key"}, 403
-
+        
+        g.apiUser = client[0]
         return view(*args, **kwargs)
 
     return wrappedView
 
 
 class Menu(Resource):
+    method_decorators = [apiKeyRequired]
     def get(self):
         db = get_db()
         menu = db.execute('SELECT * FROM menu').fetchall()
@@ -81,4 +84,47 @@ class Orders(Resource):
         orders = [dict(order) for order in orders]
         return orders,200
     
+    def post(self):
+        data = request.get_json()
+        address = data.get('address',None)
+        instructions = data.get('instructions','')
+        order_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        cart = data.get('cart',None)
+        user = g.apiUser
+
+        if not cart or not address:
+            return {"message": "Address and cart are required"}, 400
+
+        db = get_db()
+        total = 0
+        for item_id, (name, quantity) in cart.items():
+            item = db.execute('SELECT price, stock FROM menu WHERE item_id = ?', (item_id,)).fetchone()
+            if not item:
+                return {"message": f"Item {item_id} not found"}, 400
+            if quantity > item['stock']:
+                return {"message": f"Not enough stock for {name}"}, 400
+            total += item['price'] * quantity
+
+        
+        db.execute('''INSERT INTO placed_order (user_id, order_datetime, order_address, instructions, price)
+                   VALUES (?,?,?,?,?)''', (user, order_datetime, address, instructions, total))
+        
+        db.commit()
+
+        get_order_num = db.execute('''SELECT * FROM placed_order WHERE user_id = ? AND order_datetime = ? AND order_address = ? AND instructions = ? AND price = ?'''
+                   , (user, order_datetime, address, instructions, total)).fetchone()
+        
+        order_num = get_order_num['order_num']
+
+        for id in cart:
+            db.execute('''INSERT INTO in_order (order_num, item_id, quantity)
+                       VALUES (?,?,?)''', (order_num, id, cart[id][1]))
+            
+            db.execute('''UPDATE menu
+                        SET stock = stock - ?
+                        WHERE item_id = ?''',(cart[id][1], id) )
+        
+        db.commit()
+        return {'message':'Order placed successfully','order_num':order_num},201
+        
 myapi.add_resource(Orders,"/orders")
