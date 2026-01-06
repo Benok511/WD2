@@ -85,6 +85,13 @@ class Orders(Resource):
         return orders,200
     
     def post(self):
+        """
+        Expects data to be sent in json format 
+        with address and cart being mandatory
+        and instructions optional
+        cart must be in json format with k,v pair of
+        itemId : [item name, item qty, total ammount for that item]
+        """
         data = request.get_json()
         address = data.get('address',None)
         instructions = data.get('instructions','')
@@ -97,34 +104,33 @@ class Orders(Resource):
 
         db = get_db()
         total = 0
-        for item_id, (name, quantity) in cart.items():
-            item = db.execute('SELECT price, stock FROM menu WHERE item_id = ?', (item_id,)).fetchone()
-            if not item:
-                return {"message": f"Item {item_id} not found"}, 400
-            if quantity > item['stock']:
-                return {"message": f"Not enough stock for {name}"}, 400
-            total += item['price'] * quantity
+        try:
+            for item_id, (name, quantity) in cart.items():
+                item = db.execute('SELECT price, stock FROM menu WHERE item_id = ?', (item_id,)).fetchone()
+                if not item:
+                    return {"message": f"Item {item_id} not found"}, 400
+                if quantity > item['stock']:
+                    return {"message": f"Not enough stock for {name}"}, 400
+                total += item['price'] * quantity
 
-        
-        db.execute('''INSERT INTO placed_order (user_id, order_datetime, order_address, instructions, price)
-                   VALUES (?,?,?,?,?)''', (user, order_datetime, address, instructions, total))
-        
-        db.commit()
-
-        get_order_num = db.execute('''SELECT * FROM placed_order WHERE user_id = ? AND order_datetime = ? AND order_address = ? AND instructions = ? AND price = ?'''
-                   , (user, order_datetime, address, instructions, total)).fetchone()
-        
-        order_num = get_order_num['order_num']
-
-        for id in cart:
-            db.execute('''INSERT INTO in_order (order_num, item_id, quantity)
-                       VALUES (?,?,?)''', (order_num, id, cart[id][1]))
             
-            db.execute('''UPDATE menu
-                        SET stock = stock - ?
-                        WHERE item_id = ?''',(cart[id][1], id) )
+            cursor = db.execute('''INSERT INTO placed_order (user_id, order_datetime, order_address, instructions, price)
+                    VALUES (?,?,?,?,?)''', (user, order_datetime, address, instructions, total))
+            
+            order_num = cursor.lastrowid
+            for id in cart:
+                db.execute('''INSERT INTO in_order (order_num, item_id, quantity)
+                        VALUES (?,?,?)''', (order_num, id, cart[id][1]))
+                
+                db.execute('''UPDATE menu
+                            SET stock = stock - ?
+                            WHERE item_id = ?''',(cart[id][1], id) )
+            
+            db.commit()
+            return {'message':'Order placed successfully','order_num':order_num},201
         
-        db.commit()
-        return {'message':'Order placed successfully','order_num':order_num},201
+        except Exception as e:
+            db.rollback()
+            return {'message':f'An error has occurred {str(e)}'},500
         
 myapi.add_resource(Orders,"/orders")
