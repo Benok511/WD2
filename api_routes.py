@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, g
+from flask import Blueprint, request, g
 from database import get_db
 from functools import wraps
 from datetime import datetime
@@ -22,7 +22,7 @@ def apiKeyRequired(view):
     '''
     @wraps(view)
     def wrappedView(*args,**kwargs):
-        api_key = request.headers.get("x-api-key")
+        api_key = request.headers.get("x-api-key")  
 
         if not api_key:
             return {"message": "API key required"}, 401

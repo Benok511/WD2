@@ -30,7 +30,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = 'filesystem'
 
 #adding api connection
-app.register_blueprint(api)
+app.register_blueprint(api,url_prefix='/api')
 
 
 #file upload setup
